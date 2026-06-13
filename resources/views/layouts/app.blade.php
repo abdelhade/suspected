@@ -56,20 +56,33 @@
                 </a>
 
                 @foreach([
-                    ['label' => 'المسجّلون', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
-                    ['label' => 'المحاضر', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    ['label' => 'البحث المتقدم', 'icon' => 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'],
-                    ['label' => 'الأسلحة', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
-                    ['label' => 'بانتظار الاعتماد', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                    ['label' => 'سجل التدقيق', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                    ['label' => 'المسجّلون', 'route' => 'suspects.index', 'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                    ['label' => 'المحاضر', 'route' => 'reports.index', 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                    ['label' => 'البحث المتقدم', 'route' => null, 'icon' => 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'],
+                    ['label' => 'الأسلحة', 'route' => null, 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z'],
+                    ['label' => 'بانتظار الاعتماد', 'route' => null, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    ['label' => 'سجل التدقيق', 'route' => null, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
                 ] as $item)
-                    <span class="mb-0.5 flex cursor-not-allowed items-center gap-2.5 border border-transparent px-3 py-2.5 text-sm font-bold text-brutal-smoke/40">
-                        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
-                        </svg>
-                        {{ $item['label'] }}
-                        <span class="mr-auto border border-brutal-black/20 px-1.5 py-0.5 text-xs uppercase tracking-widest">قريباً</span>
-                    </span>
+                    @if($item['route'])
+                        <a href="{{ route($item['route']) }}"
+                           class="mb-0.5 flex items-center gap-2.5 border px-3 py-2.5 text-sm font-bold tracking-wide transition-colors
+                           {{ request()->routeIs(explode('.', $item['route'])[0] . '.*')
+                               ? 'border-brutal-black bg-neon text-brutal-black neon-glow'
+                               : 'border-transparent text-brutal-smoke hover:border-brutal-black hover:bg-neon/20' }}">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
+                            </svg>
+                            {{ $item['label'] }}
+                        </a>
+                    @else
+                        <span class="mb-0.5 flex cursor-not-allowed items-center gap-2.5 border border-transparent px-3 py-2.5 text-sm font-bold text-brutal-smoke/40">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
+                            </svg>
+                            {{ $item['label'] }}
+                            <span class="mr-auto border border-brutal-black/20 px-1.5 py-0.5 text-xs uppercase tracking-widest">قريباً</span>
+                        </span>
+                    @endif
                 @endforeach
             </nav>
 
@@ -119,5 +132,6 @@
             </main>
         </div>
     </div>
+    @stack('scripts')
 </body>
 </html>
