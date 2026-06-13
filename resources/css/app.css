@@ -1,0 +1,87 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+
+    --color-brutal-white: #ffffff;
+    --color-brutal-black: #0a0a0a;
+    --color-brutal-smoke: #1a1a1a;
+    --color-neon: #e4ff00;
+    --color-neon-dim: #b8cc00;
+}
+
+@layer base {
+    html {
+        @apply font-sans antialiased;
+        font-size: 18px;
+    }
+
+    body {
+        @apply bg-brutal-white text-brutal-black font-sans font-bold text-base;
+        font-weight: 700;
+        line-height: 1.6;
+    }
+
+    body *,
+    body *::before,
+    body *::after {
+        @apply font-sans;
+        font-weight: 700;
+    }
+
+    *:focus-visible {
+        outline: 2px solid var(--color-neon);
+        outline-offset: 2px;
+        box-shadow: 0 0 12px color-mix(in srgb, var(--color-neon) 60%, transparent);
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline: 2px solid var(--color-neon);
+        outline-offset: 2px;
+        box-shadow: 0 0 12px color-mix(in srgb, var(--color-neon) 60%, transparent);
+    }
+}
+
+@layer components {
+    .brutal-border {
+        @apply border border-brutal-black;
+    }
+
+    .brutal-card {
+        @apply border border-brutal-black bg-brutal-white;
+    }
+
+    .brutal-btn {
+        @apply inline-flex items-center gap-2 border border-brutal-black px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors;
+    }
+
+    .brutal-btn-primary {
+        @apply inline-flex items-center gap-2 border border-brutal-black px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors bg-brutal-black text-neon hover:bg-brutal-smoke;
+    }
+
+    .brutal-btn-secondary {
+        @apply inline-flex items-center gap-2 border border-brutal-black px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors bg-brutal-white text-brutal-black hover:bg-neon hover:text-brutal-black;
+    }
+
+    .brutal-btn-ghost {
+        @apply inline-flex items-center gap-2 border border-transparent px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors bg-transparent hover:border-brutal-black hover:bg-neon;
+    }
+
+    .neon-text {
+        color: var(--color-neon);
+        text-shadow: 0 0 8px color-mix(in srgb, var(--color-neon) 50%, transparent);
+    }
+
+    .neon-glow {
+        box-shadow: 0 0 16px color-mix(in srgb, var(--color-neon) 40%, transparent);
+    }
+}
