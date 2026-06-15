@@ -7,194 +7,169 @@
 @section('content')
 
 @if($errors->any())
-    <div class="mb-5 border border-brutal-black bg-brutal-black p-4">
-        <p class="mb-2 text-sm font-bold text-neon">يوجد أخطاء في البيانات:</p>
-        <ul class="space-y-1 list-disc list-inside">
+    <div class="alert mb-4 p-3" style="border:1px solid var(--brutal-black);background:var(--brutal-black);">
+        <div class="neon-text fw-bold mb-2" style="font-size:.875rem;">يوجد أخطاء في البيانات:</div>
+        <ul class="mb-0 ps-3">
             @foreach($errors->all() as $error)
-                <li class="text-xs font-bold text-neon/80">{{ $error }}</li>
+                <li style="font-size:.75rem;color:var(--neon);opacity:.85;">{{ $error }}</li>
             @endforeach
         </ul>
     </div>
 @endif
 
 <form method="POST" action="{{ route('suspects.update', $suspect) }}" enctype="multipart/form-data" id="suspect-form">
-    @csrf
-    @method('PUT')
+    @csrf @method('PUT')
 
     {{-- Toolbar --}}
-    <div class="mb-5 flex items-center justify-between sticky top-0 z-10 bg-brutal-white/90 backdrop-blur-sm p-3 border-b-4 border-brutal-black">
-        <h1 class="text-xl font-black uppercase text-brutal-black">تعديل المسجل</h1>
-        <div class="flex gap-2">
-            <a href="{{ route('suspects.show', $suspect) }}" class="brutal-btn-ghost px-5 py-2">
-                ← إلغاء
-            </a>
-            <button type="submit" id="submit-btn" class="brutal-btn-primary px-8 py-2">
-                حفظ التعديلات
-            </button>
+    <div class="d-flex align-items-center justify-content-between mb-4 p-3 position-sticky top-0 bg-white"
+         style="z-index:100;border-bottom:3px solid var(--brutal-black);">
+        <h1 class="mb-0 fw-bold" style="font-size:1.1rem;">تعديل المسجل</h1>
+        <div class="d-flex gap-2">
+            <a href="{{ route('suspects.show', $suspect) }}" class="btn btn-brutal-ghost px-4">← إلغاء</a>
+            <button type="submit" id="submit-btn" class="btn btn-brutal-primary px-5">حفظ التعديلات</button>
         </div>
     </div>
 
-    <div class="space-y-5">
+    <div class="d-flex flex-column gap-4">
 
-        {{-- =====================================================
-             القسم 1: البيانات الشخصية
-        ====================================================== --}}
+        {{-- القسم 1: البيانات الشخصية --}}
         <div class="brutal-card">
-            <div class="flex items-center gap-3 border-b border-brutal-black bg-brutal-black px-5 py-3">
-                <span class="flex h-6 w-6 items-center justify-center bg-neon text-xs font-bold text-brutal-black">١</span>
-                <h2 class="text-sm font-bold uppercase tracking-widest text-neon">البيانات الشخصية</h2>
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="section-num">١</span> البيانات الشخصية
             </div>
-            <div class="grid grid-cols-1 gap-4 p-5 md:grid-cols-3">
-
-                {{-- الاسم الرباعي --}}
-                <div class="flex flex-col gap-1.5 md:col-span-2">
-                    <label for="full_name" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الاسم الرباعي</label>
-                    <input id="full_name" type="text" name="full_name"
-                           value="{{ old('full_name', $suspect->full_name) }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon focus:bg-neon/5 @error('full_name') border-red-500 @enderror">
-                </div>
-
-                {{-- اسم الشهرة --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="alias_name" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">اسم الشهرة / اللقب</label>
-                    <input id="alias_name" type="text" name="alias_name"
-                           value="{{ old('alias_name', $suspect->alias_name) }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('alias_name') border-red-500 @enderror">
-                </div>
-
-                {{-- الرقم القومي --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="national_id" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الرقم القومي</label>
-                    <input id="national_id" type="text" name="national_id"
-                           value="{{ old('national_id', $suspect->national_id) }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('national_id') border-red-500 @enderror">
-                </div>
-
-                {{-- تاريخ الميلاد --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="birth_date" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">تاريخ الميلاد</label>
-                    <input id="birth_date" type="date" name="birth_date"
-                           value="{{ old('birth_date', $suspect->birth_date?->format('Y-m-d')) }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('birth_date') border-red-500 @enderror">
-                </div>
-
-                {{-- محل الإقامة --}}
-                <div class="flex flex-col gap-1.5 md:col-span-3">
-                    <label for="current_address" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">محل الإقامة</label>
-                    <textarea id="current_address" name="current_address" rows="2"
-                              class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold resize-y focus:outline-none focus:border-neon @error('current_address') border-red-500 @enderror">{{ old('current_address', $suspect->current_address) }}</textarea>
-                </div>
-
-            </div>
-        </div>
-
-        {{-- =====================================================
-             القسم 2: التصنيف الجنائي
-        ====================================================== --}}
-        <div class="brutal-card">
-            <div class="flex items-center gap-3 border-b border-brutal-black bg-brutal-black px-5 py-3">
-                <span class="flex h-6 w-6 items-center justify-center bg-neon text-xs font-bold text-brutal-black">٢</span>
-                <h2 class="text-sm font-bold uppercase tracking-widest text-neon">التصنيف الجنائي</h2>
-            </div>
-            <div class="grid grid-cols-1 gap-4 p-5 md:grid-cols-3">
-
-                {{-- فئة المسجل --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="registration_category" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">فئة المسجل</label>
-                    <select id="registration_category" name="registration_category"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('registration_category') border-red-500 @enderror">
-                        <option value="">— اختر —</option>
-                        @foreach(['مسجل شقي خطر', 'معلومات', 'مطلوب', 'مشتبه به', 'زائر'] as $cat)
-                            <option value="{{ $cat }}" @selected(old('registration_category', $suspect->registration_category) === $cat)>{{ $cat }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- درجة الخطورة --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="danger_level" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">مستوى الخطورة</label>
-                    <select id="danger_level" name="danger_level"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('danger_level') border-red-500 @enderror">
-                        <option value="">— اختر —</option>
-                        @foreach(['عالية جداً', 'عالية', 'متوسطة', 'منخفضة'] as $danger)
-                            <option value="{{ $danger }}" @selected(old('danger_level', $suspect->danger_level) === $danger)>{{ $danger }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- الحالة --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="current_status" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الحالة الجنائية الحالية</label>
-                    <select id="current_status" name="current_status"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('current_status') border-red-500 @enderror">
-                        <option value="">— اختر —</option>
-                        @foreach(['هارب', 'محبوس', 'مفرج عنه', 'تحت المراقبة', 'حر'] as $status)
-                            <option value="{{ $status }}" @selected(old('current_status', $suspect->current_status) === $status)>{{ $status }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- النشاط الإجرامي --}}
-                <div class="flex flex-col gap-1.5 md:col-span-3">
-                    <label for="criminal_activity" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">النشاط الإجرامي</label>
-                    <input id="criminal_activity" type="text" name="criminal_activity"
-                           value="{{ old('criminal_activity', $suspect->criminal_activity) }}"
-                           placeholder="سرقة، مخدرات، بلطجة..."
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('criminal_activity') border-red-500 @enderror">
-                </div>
-
-            </div>
-        </div>
-
-        {{-- =====================================================
-             القسم 3: المواصفات والمرفقات
-        ====================================================== --}}
-        <div class="brutal-card">
-            <div class="flex items-center gap-3 border-b border-brutal-black bg-brutal-black px-5 py-3">
-                <span class="flex h-6 w-6 items-center justify-center bg-neon text-xs font-bold text-brutal-black">٣</span>
-                <h2 class="text-sm font-bold uppercase tracking-widest text-neon">المواصفات الجسدية والصورة</h2>
-            </div>
-            <div class="grid grid-cols-1 gap-4 p-5 md:grid-cols-3">
-
-                {{-- الطول --}}
-                <div class="flex flex-col gap-1.5">
-                    <label for="height_cm" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الطول (سم)</label>
-                    <input id="height_cm" type="number" name="height_cm"
-                           value="{{ old('height_cm', $suspect->height_cm) }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('height_cm') border-red-500 @enderror">
-                </div>
-
-                {{-- بنية الجسم --}}
-                <div class="flex flex-col gap-1.5 md:col-span-2">
-                    <label for="body_build" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">بنية الجسم</label>
-                    <select id="body_build" name="body_build"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('body_build') border-red-500 @enderror">
-                        <option value="">— اختر —</option>
-                        @foreach(['نحيف', 'متوسط', 'رياضي', 'ممتلئ', 'بدين'] as $build)
-                            <option value="{{ $build }}" @selected(old('body_build', $suspect->body_build) === $build)>{{ $build }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- العلامات المميزة --}}
-                <div class="flex flex-col gap-1.5 md:col-span-3">
-                    <label for="distinguishing_marks" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">العلامات المميزة والوشوم</label>
-                    <textarea id="distinguishing_marks" name="distinguishing_marks" rows="2"
-                              class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold resize-y focus:outline-none focus:border-neon @error('distinguishing_marks') border-red-500 @enderror">{{ old('distinguishing_marks', $suspect->distinguishing_marks) }}</textarea>
-                </div>
-
-                {{-- الصورة الشخصية --}}
-                <div class="flex flex-col gap-1.5 md:col-span-3 border-t border-brutal-black/20 pt-4 mt-2">
-                    <label for="profile_image" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">تغيير الصورة الشخصية (اختياري)</label>
-                    <div class="flex items-start gap-4">
-                        @if($suspect->profile_image_path)
-                            <img src="{{ asset('storage/' . $suspect->profile_image_path) }}" alt="الصورة الحالية" class="h-16 w-16 border border-brutal-black object-cover">
-                        @endif
-                        <input id="profile_image" type="file" name="profile_image" accept="image/*"
-                               class="border border-brutal-black bg-brutal-white p-2 text-sm font-bold focus:outline-none focus:border-neon file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:text-sm file:font-semibold file:bg-brutal-black file:text-neon hover:file:bg-brutal-smoke @error('profile_image') border-red-500 @enderror">
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-12 col-md-8">
+                        <label for="full_name" class="form-label">الاسم الرباعي</label>
+                        <input id="full_name" type="text" name="full_name"
+                               value="{{ old('full_name', $suspect->full_name) }}"
+                               class="form-control @error('full_name') is-invalid @enderror">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="alias_name" class="form-label">اسم الشهرة / اللقب</label>
+                        <input id="alias_name" type="text" name="alias_name"
+                               value="{{ old('alias_name', $suspect->alias_name) }}"
+                               class="form-control @error('alias_name') is-invalid @enderror">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="national_id" class="form-label">الرقم القومي</label>
+                        <input id="national_id" type="text" name="national_id"
+                               value="{{ old('national_id', $suspect->national_id) }}"
+                               class="form-control @error('national_id') is-invalid @enderror">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="birth_date" class="form-label">تاريخ الميلاد</label>
+                        <input id="birth_date" type="date" name="birth_date"
+                               value="{{ old('birth_date', $suspect->birth_date?->format('Y-m-d')) }}"
+                               class="form-control @error('birth_date') is-invalid @enderror">
+                    </div>
+                    <div class="col-12">
+                        <label for="current_address" class="form-label">محل الإقامة</label>
+                        <textarea id="current_address" name="current_address" rows="2"
+                                  class="form-control @error('current_address') is-invalid @enderror">{{ old('current_address', $suspect->current_address) }}</textarea>
                     </div>
                 </div>
+            </div>
+        </div>
 
+        {{-- القسم 2: التصنيف الجنائي --}}
+        <div class="brutal-card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="section-num">٢</span> التصنيف الجنائي
+            </div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label for="registration_category" class="form-label">فئة المسجل</label>
+                        <select id="registration_category" name="registration_category"
+                                class="form-select @error('registration_category') is-invalid @enderror">
+                            <option value="">— اختر —</option>
+                            @foreach(['مسجل شقي خطر', 'معلومات', 'مطلوب', 'مشتبه به', 'زائر'] as $cat)
+                                <option value="{{ $cat }}" @selected(old('registration_category', $suspect->registration_category) === $cat)>{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="danger_level" class="form-label">مستوى الخطورة</label>
+                        <select id="danger_level" name="danger_level"
+                                class="form-select @error('danger_level') is-invalid @enderror">
+                            <option value="">— اختر —</option>
+                            @foreach(['عالية جداً', 'عالية', 'متوسطة', 'منخفضة'] as $danger)
+                                <option value="{{ $danger }}" @selected(old('danger_level', $suspect->danger_level) === $danger)>{{ $danger }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="current_status" class="form-label">الحالة الجنائية الحالية</label>
+                        <select id="current_status" name="current_status"
+                                class="form-select @error('current_status') is-invalid @enderror">
+                            <option value="">— اختر —</option>
+                            @foreach(['هارب', 'محبوس', 'مفرج عنه', 'تحت المراقبة', 'حر'] as $status)
+                                <option value="{{ $status }}" @selected(old('current_status', $suspect->current_status) === $status)>{{ $status }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label for="criminal_activity" class="form-label">النشاط الإجرامي</label>
+                        <input id="criminal_activity" type="text" name="criminal_activity"
+                               value="{{ old('criminal_activity', $suspect->criminal_activity) }}"
+                               placeholder="سرقة، مخدرات، بلطجة..."
+                               class="form-control @error('criminal_activity') is-invalid @enderror">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- القسم 3: المواصفات الجسدية والصورة --}}
+        <div class="brutal-card">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="section-num">٣</span> المواصفات الجسدية والصورة
+            </div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label for="height_cm" class="form-label">الطول (سم)</label>
+                        <input id="height_cm" type="number" name="height_cm"
+                               value="{{ old('height_cm', $suspect->height_cm) }}"
+                               class="form-control @error('height_cm') is-invalid @enderror">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="body_build" class="form-label">بنية الجسم</label>
+                        <select id="body_build" name="body_build"
+                                class="form-select @error('body_build') is-invalid @enderror">
+                            <option value="">— اختر —</option>
+                            @foreach(['نحيف', 'متوسط', 'رياضي', 'ممتلئ', 'بدين'] as $build)
+                                <option value="{{ $build }}" @selected(old('body_build', $suspect->body_build) === $build)>{{ $build }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="skin_color" class="form-label">لون البشرة</label>
+                        <select id="skin_color" name="skin_color"
+                                class="form-select @error('skin_color') is-invalid @enderror">
+                            <option value="">— اختر —</option>
+                            @foreach(['أبيض', 'قمحي', 'أسمر', 'أسود'] as $color)
+                                <option value="{{ $color }}" @selected(old('skin_color', $suspect->skin_color ?? '') === $color)>{{ $color }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label for="distinguishing_marks" class="form-label">العلامات المميزة والوشوم</label>
+                        <textarea id="distinguishing_marks" name="distinguishing_marks" rows="2"
+                                  class="form-control @error('distinguishing_marks') is-invalid @enderror">{{ old('distinguishing_marks', $suspect->distinguishing_marks) }}</textarea>
+                    </div>
+                    <div class="col-12 pt-2" style="border-top:1px solid rgba(10,10,10,.15);">
+                        <label for="profile_image" class="form-label">تغيير الصورة الشخصية (اختياري)</label>
+                        <div class="d-flex align-items-start gap-3">
+                            @if($suspect->profile_image_path)
+                                <img src="{{ asset('storage/' . $suspect->profile_image_path) }}" alt="الصورة الحالية"
+                                     style="width:64px;height:64px;object-fit:cover;border:1px solid var(--brutal-black);">
+                            @endif
+                            <input id="profile_image" type="file" name="profile_image" accept="image/*"
+                                   class="form-control @error('profile_image') is-invalid @enderror">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -208,22 +183,18 @@ document.addEventListener('keydown', function(e) {
     if (!['INPUT', 'SELECT'].includes(e.target.tagName)) return;
     if (e.target.tagName === 'SELECT' && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) return;
 
-    const formElements = Array.from(document.querySelectorAll('#suspect-form input:not([type="hidden"]):not([disabled]), #suspect-form select:not([disabled]), #submit-btn'));
+    const formElements = Array.from(document.querySelectorAll(
+        '#suspect-form input:not([type="hidden"]):not([disabled]), #suspect-form select:not([disabled]), #submit-btn'
+    ));
     const index = formElements.indexOf(e.target);
-    
     if (index > -1) {
-        let nextIndex = index;
-        if (e.key === 'Enter' || e.key === 'ArrowDown') {
-            e.preventDefault();
-            nextIndex = index + 1;
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            nextIndex = index - 1;
-        }
-        if (nextIndex >= 0 && nextIndex < formElements.length) {
-            formElements[nextIndex].focus();
-            if(formElements[nextIndex].select && formElements[nextIndex].type !== 'button' && formElements[nextIndex].type !== 'submit' && formElements[nextIndex].type !== 'file') {
-                formElements[nextIndex].select();
+        let next = index;
+        if (e.key === 'Enter' || e.key === 'ArrowDown') { e.preventDefault(); next = index + 1; }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); next = index - 1; }
+        if (next >= 0 && next < formElements.length) {
+            formElements[next].focus();
+            if (formElements[next].select && !['button','submit','file'].includes(formElements[next].type)) {
+                formElements[next].select();
             }
         }
     }

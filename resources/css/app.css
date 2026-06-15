@@ -1,87 +1,350 @@
-@import 'tailwindcss';
+/* Bootstrap */
+@import 'bootstrap/dist/css/bootstrap.min.css';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* Cairo Font */
+@import url('https://fonts.bunny.net/css?family=cairo:700,800');
 
-@theme {
-    --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+/* ─── CSS Variables ────────────────────────────────────── */
+:root {
+    --neon: #e4ff00;
+    --neon-dim: #b8cc00;
+    --brutal-black: #0a0a0a;
+    --brutal-smoke: #1a1a1a;
+    --brutal-white: #ffffff;
 
-    --color-brutal-white: #ffffff;
-    --color-brutal-black: #0a0a0a;
-    --color-brutal-smoke: #1a1a1a;
-    --color-neon: #e4ff00;
-    --color-neon-dim: #b8cc00;
+    /* Override Bootstrap primary */
+    --bs-primary: var(--brutal-black);
+    --bs-font-sans-serif: 'Cairo', system-ui, sans-serif;
+    --bs-body-font-family: 'Cairo', system-ui, sans-serif;
+    --bs-body-font-weight: 700;
+    --bs-body-color: var(--brutal-black);
+    --bs-body-bg: var(--brutal-white);
+    --bs-border-radius: 0;
+    --bs-border-radius-sm: 0;
+    --bs-border-radius-lg: 0;
+    --bs-border-radius-xl: 0;
+    --bs-border-radius-xxl: 0;
+    --bs-border-radius-pill: 0;
 }
 
-@layer base {
-    html {
-        @apply font-sans antialiased;
-        font-size: 18px;
-    }
+/* ─── Global ────────────────────────────────────────────── */
+html { font-size: 16px; }
 
-    body {
-        @apply bg-brutal-white text-brutal-black font-sans font-bold text-base;
-        font-weight: 700;
-        line-height: 1.6;
-    }
-
-    body *,
-    body *::before,
-    body *::after {
-        @apply font-sans;
-        font-weight: 700;
-    }
-
-    *:focus-visible {
-        outline: 2px solid var(--color-neon);
-        outline-offset: 2px;
-        box-shadow: 0 0 12px color-mix(in srgb, var(--color-neon) 60%, transparent);
-    }
-
-    button:focus-visible,
-    a:focus-visible,
-    input:focus-visible,
-    select:focus-visible,
-    textarea:focus-visible {
-        outline: 2px solid var(--color-neon);
-        outline-offset: 2px;
-        box-shadow: 0 0 12px color-mix(in srgb, var(--color-neon) 60%, transparent);
-    }
+body {
+    font-family: 'Cairo', system-ui, sans-serif;
+    font-weight: 700;
+    background: var(--brutal-white);
+    color: var(--brutal-black);
 }
 
-@layer components {
-    .brutal-border {
-        @apply border border-brutal-black;
-    }
+*, *::before, *::after {
+    font-family: 'Cairo', system-ui, sans-serif;
+    border-radius: 0 !important;
+}
 
-    .brutal-card {
-        @apply border border-brutal-black bg-brutal-white;
-    }
+/* Remove Bootstrap rounded corners everywhere */
+.btn, .form-control, .form-select, .card, .badge,
+.input-group-text, .modal-content, .alert, .table {
+    border-radius: 0 !important;
+}
 
-    .brutal-btn {
-        @apply inline-flex items-center gap-2 border border-brutal-black px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors;
-    }
+/* ─── Neon Accent ───────────────────────────────────────── */
+.neon-bg    { background-color: var(--neon); }
+.neon-text  { color: var(--neon); }
+.neon-border { border-color: var(--neon) !important; }
+.neon-glow  { box-shadow: 0 0 16px rgba(228, 255, 0, 0.4); }
 
-    .brutal-btn-primary {
-        @apply inline-flex items-center gap-2 border border-brutal-black px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors bg-brutal-black text-neon hover:bg-brutal-smoke;
-    }
+/* ─── Sidebar ───────────────────────────────────────────── */
+#sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--brutal-white);
+    border-left: 1px solid var(--brutal-black);
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 1045;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+}
 
-    .brutal-btn-secondary {
-        @apply inline-flex items-center gap-2 border border-brutal-black px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors bg-brutal-white text-brutal-black hover:bg-neon hover:text-brutal-black;
-    }
+#sidebar .sidebar-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--brutal-black);
+}
 
-    .brutal-btn-ghost {
-        @apply inline-flex items-center gap-2 border border-transparent px-4 py-2.5 text-sm font-bold tracking-wide uppercase transition-colors bg-transparent hover:border-brutal-black hover:bg-neon;
-    }
+#sidebar nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--brutal-smoke);
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+    transition: background 0.15s, border-color 0.15s;
+}
+#sidebar nav .nav-link:hover {
+    border-color: var(--brutal-black);
+    background: rgba(228, 255, 0, 0.2);
+}
+#sidebar nav .nav-link.active {
+    border-color: var(--brutal-black);
+    background: var(--neon);
+    color: var(--brutal-black);
+}
+#sidebar nav .nav-link.disabled-link {
+    color: rgba(26,26,26,0.35);
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
-    .neon-text {
-        color: var(--color-neon);
-        text-shadow: 0 0 8px color-mix(in srgb, var(--color-neon) 50%, transparent);
-    }
+#sidebar .sidebar-footer {
+    border-top: 1px solid var(--brutal-black);
+    padding: 0.75rem;
+}
 
-    .neon-glow {
-        box-shadow: 0 0 16px color-mix(in srgb, var(--color-neon) 40%, transparent);
-    }
+/* ─── Main Layout ───────────────────────────────────────── */
+#main-wrap {
+    margin-right: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 991.98px) {
+    #sidebar { transform: translateX(100%); }
+    #sidebar.show { transform: translateX(0); }
+    #main-wrap { margin-right: 0; }
+    #sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 1044; background: rgba(10,10,10,0.6); }
+    #sidebar-overlay.show { display: block; }
+}
+
+/* ─── Top Bar ───────────────────────────────────────────── */
+#topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--brutal-black);
+    background: var(--brutal-white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+}
+
+/* ─── Cards ─────────────────────────────────────────────── */
+.brutal-card {
+    border: 1px solid var(--brutal-black);
+    background: var(--brutal-white);
+}
+.brutal-card .card-header {
+    background: var(--brutal-black);
+    color: var(--neon);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--brutal-black);
+    padding: 0.65rem 1.25rem;
+    border-radius: 0 !important;
+}
+.brutal-card .card-header .section-num {
+    display: inline-flex;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    background: var(--neon);
+    color: var(--brutal-black);
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+}
+
+/* ─── Buttons ───────────────────────────────────────────── */
+.btn-brutal-primary {
+    background: var(--brutal-black);
+    color: var(--neon);
+    border: 1px solid var(--brutal-black);
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+}
+.btn-brutal-primary:hover {
+    background: var(--brutal-smoke);
+    color: var(--neon);
+    border-color: var(--brutal-smoke);
+}
+.btn-brutal-secondary {
+    background: var(--brutal-white);
+    color: var(--brutal-black);
+    border: 1px solid var(--brutal-black);
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+.btn-brutal-secondary:hover {
+    background: var(--neon);
+    color: var(--brutal-black);
+    border-color: var(--brutal-black);
+}
+.btn-brutal-ghost {
+    background: transparent;
+    color: var(--brutal-smoke);
+    border: 1px solid transparent;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+.btn-brutal-ghost:hover {
+    border-color: var(--brutal-black);
+    background: var(--neon);
+    color: var(--brutal-black);
+}
+
+/* ─── Form Controls ─────────────────────────────────────── */
+.form-control, .form-select {
+    border: 1px solid var(--brutal-black);
+    background: var(--brutal-white);
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--brutal-black);
+    border-radius: 0 !important;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--neon);
+    background: rgba(228,255,0,0.04);
+    box-shadow: 0 0 0 3px rgba(228,255,0,0.25);
+    color: var(--brutal-black);
+}
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #dc3545;
+}
+.form-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+    margin-bottom: 0.35rem;
+}
+
+/* ─── Tables ────────────────────────────────────────────── */
+.table thead tr {
+    background: var(--brutal-black);
+    color: var(--neon);
+}
+.table thead th {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-bottom: none;
+    padding: 0.65rem 1rem;
+}
+.table tbody td {
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    font-size: 0.875rem;
+    vertical-align: middle;
+    border-color: rgba(10,10,10,0.1);
+}
+.table-hover tbody tr:hover {
+    background: rgba(228,255,0,0.08);
+}
+
+/* ─── Badges ────────────────────────────────────────────── */
+.badge-brutal {
+    display: inline-flex;
+    border: 1px solid var(--brutal-black);
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.badge-neon   { background: var(--neon); color: var(--brutal-black); }
+.badge-dark   { background: var(--brutal-black); color: var(--neon); }
+.badge-light  { background: var(--brutal-white); color: rgba(26,26,26,0.6); }
+
+/* ─── Stat Card ─────────────────────────────────────────── */
+.stat-card {
+    border: 1px solid var(--brutal-black);
+    padding: 1rem;
+    background: var(--brutal-white);
+}
+.stat-card.highlighted {
+    box-shadow: 0 0 16px rgba(228,255,0,0.4);
+}
+.stat-card .stat-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--brutal-black);
+}
+.stat-card.highlighted .stat-icon { background: var(--neon); }
+.stat-card .stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.stat-card.highlighted .stat-value { color: var(--neon); }
+.stat-card .stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(26,26,26,0.55);
+}
+.stat-card .stat-trend {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(26,26,26,0.45);
+}
+
+/* ─── Action Icon Buttons ───────────────────────────────── */
+.btn-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(10,10,10,0.3);
+    background: var(--brutal-white);
+    color: rgba(26,26,26,0.6);
+    transition: all 0.15s;
+    padding: 0;
+}
+.btn-icon:hover { border-color: var(--brutal-black); background: var(--neon); color: var(--brutal-black); }
+.btn-icon.btn-icon-dark:hover { background: var(--brutal-black); color: var(--neon); }
+.btn-icon.btn-icon-danger:hover { background: #dc3545; border-color: #dc3545; color: white; }
+
+/* ─── Misc ──────────────────────────────────────────────── */
+.section-divider { border-top: 1px solid rgba(10,10,10,0.15); }
+.text-muted-brutal { color: rgba(26,26,26,0.5) !important; }
+.text-xs { font-size: 0.75rem; }
+.fw-black { font-weight: 800; }
+.tracking-wide { letter-spacing: 0.05em; }
+.tracking-widest { letter-spacing: 0.12em; }
+
+/* ─── Progress bars ─────────────────────────────────────── */
+.progress { border-radius: 0 !important; height: 6px; background: var(--brutal-white); border: 1px solid var(--brutal-black); }
+.progress-bar { border-radius: 0 !important; background: var(--brutal-black); }
+.progress-bar.neon { background: var(--neon); }
+
+/* ─── Party / Seizure rows in forms ─────────────────────── */
+.party-row, .statement-row, .seizure-row {
+    border: 1px solid rgba(10,10,10,0.15);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
 }
