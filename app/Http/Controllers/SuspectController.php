@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Suspect;
+use App\Models\LookupOption;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -10,6 +12,17 @@ use Illuminate\Support\Facades\Storage;
 
 class SuspectController extends Controller
 {
+    private function lookups(): array
+    {
+        return [
+            'registrationCategories' => LookupOption::valuesFor('registration_category'),
+            'dangerLevels'           => LookupOption::valuesFor('danger_level'),
+            'suspectStatuses'        => LookupOption::valuesFor('suspect_status'),
+            'bodyBuilds'             => LookupOption::valuesFor('body_build'),
+            'skinColors'             => LookupOption::valuesFor('skin_color'),
+        ];
+    }
+
     /**
      * عرض قائمة المسجلين والمطلوبين مع إمكانية البحث والفلترة
      */
@@ -28,17 +41,47 @@ class SuspectController extends Controller
             $query->where('current_status', $request->current_status);
         }
 
-        // البحث بالنص في الاسم، الرقم القومي، اسم الشهرة
+        // البحث بالنص في الاسم، الرقم القومي، اسم الشهرة أو رقم/موضوع/مكان المحضر المرتبط
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+
+            // جلب المحاضر التي يطابق رقمها أو موضوعها أو مكانها نص البحث
+            $matchingReportParties = Report::where('report_number', 'like', "%{$search}%")
+                ->orWhere('report_subject', 'like', "%{$search}%")
+                ->orWhere('location_governorate', 'like', "%{$search}%")
+                ->orWhere('location_details', 'like', "%{$search}%")
+                ->pluck('parties_details');
+
+            $matchingIdsOrNames = ['national_ids' => [], 'names' => []];
+            foreach ($matchingReportParties as $parties) {
+                if (is_array($parties)) {
+                    foreach ($parties as $party) {
+                        if (!empty($party['national_id'])) {
+                            $matchingIdsOrNames['national_ids'][] = $party['national_id'];
+                        }
+                        if (!empty($party['full_name'])) {
+                            $matchingIdsOrNames['names'][] = $party['full_name'];
+                        }
+                    }
+                }
+            }
+
+            $query->where(function ($q) use ($search, $matchingIdsOrNames) {
                 $q->where('full_name', 'like', "%{$search}%")
                   ->orWhere('national_id', 'like', "%{$search}%")
                   ->orWhere('alias_name', 'like', "%{$search}%");
+
+                if (!empty($matchingIdsOrNames['national_ids'])) {
+                    $q->orWhereIn('national_id', $matchingIdsOrNames['national_ids']);
+                }
+                if (!empty($matchingIdsOrNames['names'])) {
+                    $q->orWhereIn('full_name', $matchingIdsOrNames['names']);
+                }
             });
         }
 
         $suspects = $query->paginate(15)->withQueryString();
+        Suspect::attachLinkedReports($suspects->getCollection());
 
         return view('suspects.index', compact('suspects'));
     }
@@ -48,7 +91,7 @@ class SuspectController extends Controller
      */
     public function create(): View
     {
-        return view('suspects.create');
+        return view('suspects.create', $this->lookups());
     }
 
     /**
@@ -69,6 +112,7 @@ class SuspectController extends Controller
             'distinguishing_marks' => 'nullable|string',
             'height_cm' => 'nullable|integer',
             'body_build' => 'nullable|string|max:255',
+            'skin_color' => 'nullable|string|max:255',
             'profile_image' => 'nullable|image|max:2048', // 2MB Max
         ]);
 
@@ -101,7 +145,7 @@ class SuspectController extends Controller
      */
     public function edit(Suspect $suspect): View
     {
-        return view('suspects.edit', compact('suspect'));
+        return view('suspects.edit', array_merge(['suspect' => $suspect], $this->lookups()));
     }
 
     /**
@@ -122,6 +166,7 @@ class SuspectController extends Controller
             'distinguishing_marks' => 'nullable|string',
             'height_cm' => 'nullable|integer',
             'body_build' => 'nullable|string|max:255',
+            'skin_color' => 'nullable|string|max:255',
             'profile_image' => 'nullable|image|max:2048',
         ]);
 

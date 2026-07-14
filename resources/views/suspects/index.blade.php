@@ -13,7 +13,7 @@
             <div class="col-12 col-md">
                 <label class="form-label">بحث</label>
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="ابحث بالاسم، الرقم القومي..."
+                       placeholder="ابحث بالاسم، الرقم القومي، رقم المحضر، أو موضوعه..."
                        class="form-control">
             </div>
             <div class="col-6 col-md-auto">
@@ -64,6 +64,7 @@
                 <tr>
                     <th>صورة</th>
                     <th>الاسم الرباعي</th>
+                    <th>المحاضر المرتبطة (الحالة / المكان)</th>
                     <th>الفئة</th>
                     <th>النشاط الإجرامي</th>
                     <th>الخطورة</th>
@@ -91,6 +92,33 @@
                             <div class="fw-bold">{{ $suspect->full_name ?? '-' }}</div>
                             @if($suspect->alias_name)
                                 <div class="text-xs text-muted-brutal">شهرته: {{ $suspect->alias_name }}</div>
+                            @endif
+                        </td>
+                        <td>
+                            @if($suspect->linked_reports->isNotEmpty())
+                                <div class="d-flex flex-column gap-1">
+                                    @foreach($suspect->linked_reports as $report)
+                                        <div class="p-1 brutal-card mb-1 text-xs" style="background: rgba(228, 255, 0, 0.05); font-size: 0.8rem; border-color: rgba(10,10,10,.1);">
+                                            <div>
+                                                <strong>محضر:</strong>
+                                                <a href="{{ route('reports.show', $report) }}" class="fw-bold text-decoration-underline text-dark">
+                                                    {{ $report->report_number ?? 'بدون رقم' }}
+                                                </a>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="badge bg-warning text-dark py-0 px-1">{{ $report->current_status ?? 'غير محدد' }}</span>
+                                                <span class="text-muted-brutal ms-1">
+                                                    📍 {{ $report->location_governorate ?? 'غير محدد' }}
+                                                    @if($report->location_details)
+                                                        — {{ $report->location_details }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-muted-brutal text-xs">—</span>
                             @endif
                         </td>
                         <td>{{ $suspect->registration_category ?? '-' }}</td>
@@ -130,7 +158,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5">
+                        <td colspan="8" class="text-center py-5">
                             <svg class="mb-2" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.3;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
                             </svg>

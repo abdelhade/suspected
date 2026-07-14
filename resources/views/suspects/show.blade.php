@@ -93,6 +93,46 @@
             </div>
         </div>
 
+        {{-- المحاضر المرتبطة --}}
+        <div class="brutal-card mt-4">
+            <div class="card-header">المحاضر المرتبطة بالمسجل خطر</div>
+            <div class="p-4">
+                @if($suspect->linked_reports->isNotEmpty())
+                    <div class="row g-3">
+                        @foreach($suspect->linked_reports as $report)
+                            <div class="col-12 col-md-6">
+                                <div class="brutal-card p-3 h-100" style="background: rgba(228, 255, 0, 0.05);">
+                                    <div class="fw-bold mb-2">
+                                        محضر رقم: 
+                                        <a href="{{ route('reports.show', $report) }}" class="text-decoration-underline text-dark fw-bold">
+                                            {{ $report->report_number ?? 'بدون رقم' }}
+                                        </a>
+                                    </div>
+                                    <div class="text-xs text-muted-brutal mb-2">
+                                        <strong>الموضوع:</strong> {{ $report->report_subject ?? 'لا يوجد موضوع' }}
+                                    </div>
+                                    <div class="text-xs mb-2">
+                                        <strong>الحالة:</strong> 
+                                        <span class="badge bg-warning text-dark py-1 px-2">{{ $report->current_status ?? 'غير محدد' }}</span>
+                                    </div>
+                                    <div class="text-xs text-muted-brutal">
+                                        <strong>المكان:</strong> 📍 {{ $report->location_governorate ?? 'غير محدد' }} 
+                                        @if($report->location_details)
+                                            - {{ $report->location_details }}
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-4 text-muted-brutal">
+                        لا توجد محاضر مرتبطة بهذا المسجل خطر حالياً.
+                    </div>
+                @endif
+            </div>
+        </div>
+
     </div>
 
     {{-- Side Column --}}

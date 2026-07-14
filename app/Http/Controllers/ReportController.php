@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Models\ReportType;
 use App\Models\ReportStatus;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+
 
 class ReportController extends Controller
 {
@@ -93,7 +95,19 @@ class ReportController extends Controller
 
         $report = Report::create($validated);
 
+        AuditLog::record(
+            'create',
+            'Report',
+            $report->id,
+            "إنشاء محضر: {$report->report_number}",
+            [],
+            $report->only(['current_status', 'report_number', 'report_type']),
+        );
+
+
+
         return redirect()
+
             ->route('reports.show', $report)
             ->with('success', 'تم إنشاء المحضر بنجاح.');
     }
@@ -147,7 +161,33 @@ class ReportController extends Controller
             }
         }
 
+        $oldValues = $report->only(['current_status', 'report_number', 'report_type']);
         $report->update($validated);
+
+        // بعد التحديث نلتقط القيم الجديدة (خصوصًا current_status)
+        $newValues = $report->only(['current_status', 'report_number', 'report_type']);
+
+        // تحديدًا لو اتغيرت current_status إلى pending => نسجّل في سجل التدقيق
+        if (($oldValues['current_status'] ?? null) !== ($newValues['current_status'] ?? null) && ($newValues['current_status'] ?? null) === 'pending') {
+            AuditLog::record(
+                'update',
+                'Report',
+                $report->id,
+                "تحويل محضر إلى pending: {$report->report_number}",
+                $oldValues,
+                $newValues,
+            );
+        } else {
+            // تسجيل حدث تعديل عام
+            AuditLog::record(
+                'update',
+                'Report',
+                $report->id,
+                "تعديل محضر: {$report->report_number}",
+                $oldValues,
+                $newValues,
+            );
+        }
 
         return redirect()
             ->route('reports.show', $report)
@@ -159,7 +199,20 @@ class ReportController extends Controller
      */
     public function destroy(Report $report): RedirectResponse
     {
+        $reportNumber = $report->report_number;
+        $reportId = $report->id;
+
         $report->delete();
+
+        AuditLog::record(
+            'delete',
+            'Report',
+            $reportId,
+            "حذف محضر: {$reportNumber}",
+            ['deleted' => true],
+            [],
+        );
+
 
         return redirect()
             ->route('reports.index')

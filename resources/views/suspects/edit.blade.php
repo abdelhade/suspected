@@ -81,33 +81,39 @@
                 <div class="row g-3">
                     <div class="col-12 col-md-4">
                         <label for="registration_category" class="form-label">فئة المسجل</label>
-                        <select id="registration_category" name="registration_category"
-                                class="form-select @error('registration_category') is-invalid @enderror">
-                            <option value="">— اختر —</option>
-                            @foreach(['مسجل شقي خطر', 'معلومات', 'مطلوب', 'مشتبه به', 'زائر'] as $cat)
-                                <option value="{{ $cat }}" @selected(old('registration_category', $suspect->registration_category) === $cat)>{{ $cat }}</option>
-                            @endforeach
-                        </select>
+                        <x-select-with-add
+                            name="registration_category"
+                            group="registration_category"
+                            :options="$registrationCategories"
+                            :selected="old('registration_category', $suspect->registration_category)"
+                            placeholder="— اختر —"
+                            label="فئة المسجل"
+                            :has-error="$errors->has('registration_category')"
+                        />
                     </div>
                     <div class="col-12 col-md-4">
                         <label for="danger_level" class="form-label">مستوى الخطورة</label>
-                        <select id="danger_level" name="danger_level"
-                                class="form-select @error('danger_level') is-invalid @enderror">
-                            <option value="">— اختر —</option>
-                            @foreach(['عالية جداً', 'عالية', 'متوسطة', 'منخفضة'] as $danger)
-                                <option value="{{ $danger }}" @selected(old('danger_level', $suspect->danger_level) === $danger)>{{ $danger }}</option>
-                            @endforeach
-                        </select>
+                        <x-select-with-add
+                            name="danger_level"
+                            group="danger_level"
+                            :options="$dangerLevels"
+                            :selected="old('danger_level', $suspect->danger_level)"
+                            placeholder="— اختر —"
+                            label="مستوى الخطورة"
+                            :has-error="$errors->has('danger_level')"
+                        />
                     </div>
                     <div class="col-12 col-md-4">
                         <label for="current_status" class="form-label">الحالة الجنائية الحالية</label>
-                        <select id="current_status" name="current_status"
-                                class="form-select @error('current_status') is-invalid @enderror">
-                            <option value="">— اختر —</option>
-                            @foreach(['هارب', 'محبوس', 'مفرج عنه', 'تحت المراقبة', 'حر'] as $status)
-                                <option value="{{ $status }}" @selected(old('current_status', $suspect->current_status) === $status)>{{ $status }}</option>
-                            @endforeach
-                        </select>
+                        <x-select-with-add
+                            name="current_status"
+                            group="suspect_status"
+                            :options="$suspectStatuses"
+                            :selected="old('current_status', $suspect->current_status)"
+                            placeholder="— اختر —"
+                            label="الحالة الجنائية"
+                            :has-error="$errors->has('current_status')"
+                        />
                     </div>
                     <div class="col-12">
                         <label for="criminal_activity" class="form-label">النشاط الإجرامي</label>
@@ -135,23 +141,27 @@
                     </div>
                     <div class="col-12 col-md-4">
                         <label for="body_build" class="form-label">بنية الجسم</label>
-                        <select id="body_build" name="body_build"
-                                class="form-select @error('body_build') is-invalid @enderror">
-                            <option value="">— اختر —</option>
-                            @foreach(['نحيف', 'متوسط', 'رياضي', 'ممتلئ', 'بدين'] as $build)
-                                <option value="{{ $build }}" @selected(old('body_build', $suspect->body_build) === $build)>{{ $build }}</option>
-                            @endforeach
-                        </select>
+                        <x-select-with-add
+                            name="body_build"
+                            group="body_build"
+                            :options="$bodyBuilds"
+                            :selected="old('body_build', $suspect->body_build)"
+                            placeholder="— اختر —"
+                            label="بنية الجسم"
+                            :has-error="$errors->has('body_build')"
+                        />
                     </div>
                     <div class="col-12 col-md-4">
                         <label for="skin_color" class="form-label">لون البشرة</label>
-                        <select id="skin_color" name="skin_color"
-                                class="form-select @error('skin_color') is-invalid @enderror">
-                            <option value="">— اختر —</option>
-                            @foreach(['أبيض', 'قمحي', 'أسمر', 'أسود'] as $color)
-                                <option value="{{ $color }}" @selected(old('skin_color', $suspect->skin_color ?? '') === $color)>{{ $color }}</option>
-                            @endforeach
-                        </select>
+                        <x-select-with-add
+                            name="skin_color"
+                            group="skin_color"
+                            :options="$skinColors"
+                            :selected="old('skin_color', $suspect->skin_color ?? '')"
+                            placeholder="— اختر —"
+                            label="لون البشرة"
+                            :has-error="$errors->has('skin_color')"
+                        />
                     </div>
                     <div class="col-12">
                         <label for="distinguishing_marks" class="form-label">العلامات المميزة والوشوم</label>
