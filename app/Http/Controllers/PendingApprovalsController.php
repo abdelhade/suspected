@@ -39,8 +39,11 @@ class PendingApprovalsController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('national_id', 'like', "%{$search}%")
                   ->orWhere('alias_name', 'like', "%{$search}%");
+
+                if (preg_match('/^\d{14}$/', $search)) {
+                    $q->orWhere('national_id_hash', hash('sha256', $search));
+                }
             });
         }
 

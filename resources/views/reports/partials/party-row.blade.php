@@ -1,3 +1,4 @@
+@php $party = $party ?? []; @endphp
 <div class="d-flex align-items-center justify-content-between mb-2">
     <span class="text-xs text-muted-brutal tracking-widest">الطرف رقم {{ $index + 1 }}</span>
     @if($index > 0)
@@ -18,7 +19,7 @@
     ] as $field => $label)
         <div class="col-6 col-md-3">
             <label class="form-label">{{ $label }}</label>
-            <input type="text" data-party="{{ $index }}" data-field="{{ $field }}"
+            <input type="text" name="parties_details[{{ $index }}][{{ $field }}]" data-party="{{ $index }}" data-field="{{ $field }}"
                    value="{{ $party[$field] ?? '' }}"
                    placeholder="{{ $label }}"
                    class="form-control party-input">

@@ -10,44 +10,61 @@
 <div class="brutal-card mb-4 p-3">
     <form method="GET" action="{{ route('suspects.index') }}">
         <div class="row g-2 align-items-end">
-            <div class="col-12 col-md">
-                <label class="form-label">بحث</label>
+            <div class="col-12 col-md-6 col-xl-4">
+                <label class="form-label">بحث عام</label>
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="ابحث بالاسم، الرقم القومي، رقم المحضر، أو موضوعه..."
+                       placeholder="ابحث بالاسم، اللقب، الرقم القومي، رقم المحضر...")
                        class="form-control">
             </div>
-            <div class="col-6 col-md-auto">
-                <label class="form-label">الفئة</label>
-                <select name="registration_category" class="form-select">
-                    <option value="">كل الفئات</option>
-                    @foreach(['مسجل شقي خطر', 'معلومات', 'مطلوب', 'مشتبه به'] as $cat)
-                        <option value="{{ $cat }}" @selected(request('registration_category') === $cat)>{{ $cat }}</option>
+            <div class="col-6 col-md-4 col-xl-2">
+                <label class="form-label">المحافظة</label>
+                <select name="governorate" class="form-select">
+                    <option value="">كل المحافظات</option>
+                    @foreach($governorates as $governorate)
+                        <option value="{{ $governorate }}" @selected(request('governorate') === $governorate)>{{ $governorate }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-6 col-md-auto">
+            <div class="col-6 col-md-4 col-xl-2">
+                <label class="form-label">نوع المسجل</label>
+                <select name="registration_category" class="form-select">
+                    <option value="">كل الأنواع</option>
+                    @foreach($registrationCategories as $category)
+                        <option value="{{ $category }}" @selected(request('registration_category') === $category)>{{ $category }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-xl-2">
                 <label class="form-label">الخطورة</label>
                 <select name="danger_level" class="form-select">
-                    <option value="">درجة الخطورة</option>
-                    @foreach(['عالية جداً', 'عالية', 'متوسطة', 'منخفضة'] as $danger)
+                    <option value="">كل درجات الخطورة</option>
+                    @foreach($dangerLevels as $danger)
                         <option value="{{ $danger }}" @selected(request('danger_level') === $danger)>{{ $danger }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-6 col-md-auto">
-                <label class="form-label">الحالة</label>
-                <select name="current_status" class="form-select">
-                    <option value="">الحالة الجنائية</option>
-                    @foreach(['هارب', 'محبوس', 'مفرج عنه', 'تحت المراقبة'] as $status)
-                        <option value="{{ $status }}" @selected(request('current_status') === $status)>{{ $status }}</option>
+            <div class="col-6 col-md-4 col-xl-2">
+                <label class="form-label">نوع التهمة</label>
+                <select name="criminal_activity" class="form-select">
+                    <option value="">كل الأساليب</option>
+                    @foreach($crimeActivities as $activity)
+                        <option value="{{ $activity }}" @selected(request('criminal_activity') === $activity)>{{ $activity }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-6 col-md-auto d-flex gap-2">
-                <button type="submit" class="btn btn-brutal-primary">بحث</button>
-                @if(request()->anyFilled(['search', 'registration_category', 'danger_level', 'current_status']))
-                    <a href="{{ route('suspects.index') }}" class="btn btn-brutal-ghost">✕</a>
-                @endif
+            <div class="col-6 col-md-4 col-xl-2">
+                <label class="form-label">نوع السلاح</label>
+                <select name="weapon_type" class="form-select">
+                    <option value="">كل أنواع الأسلحة</option>
+                    @foreach($weaponTypes as $weaponType)
+                        <option value="{{ $weaponType }}" @selected(request('weapon_type') === $weaponType)>{{ $weaponType }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-brutal-primary">تطبيق الفلتر</button>
+                <a href="{{ route('suspects.index') }}" class="btn btn-brutal-ghost">مسح الفلاتر</a>
+                <a href="{{ route('suspects.export', request()->query()) }}" class="btn btn-brutal-secondary">تصدير Excel</a>
             </div>
             <div class="col-12 col-md-auto ms-md-auto">
                 <a href="{{ route('suspects.create') }}" class="btn btn-brutal-primary w-100">+ إضافة مسجل</a>
@@ -63,12 +80,32 @@
             <thead>
                 <tr>
                     <th>صورة</th>
-                    <th>الاسم الرباعي</th>
+                    <th>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'full_name', 'direction' => request('sort') === 'full_name' && request('direction') === 'asc' ? 'desc' : 'asc']) }}">
+                            الاسم الرباعي
+                        </a>
+                    </th>
                     <th>المحاضر المرتبطة (الحالة / المكان)</th>
-                    <th>الفئة</th>
-                    <th>النشاط الإجرامي</th>
-                    <th>الخطورة</th>
-                    <th>الحالة</th>
+                    <th>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'registration_category', 'direction' => request('sort') === 'registration_category' && request('direction') === 'asc' ? 'desc' : 'asc']) }}">
+                            الفئة
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'criminal_activity', 'direction' => request('sort') === 'criminal_activity' && request('direction') === 'asc' ? 'desc' : 'asc']) }}">
+                            النشاط الإجرامي
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'danger_level', 'direction' => request('sort') === 'danger_level' && request('direction') === 'asc' ? 'desc' : 'asc']) }}">
+                            الخطورة
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'current_status', 'direction' => request('sort') === 'current_status' && request('direction') === 'asc' ? 'desc' : 'asc']) }}">
+                            الحالة
+                        </a>
+                    </th>
                     <th class="text-center">إجراء</th>
                 </tr>
             </thead>

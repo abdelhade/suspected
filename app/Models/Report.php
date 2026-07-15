@@ -29,7 +29,7 @@ class Report extends Model
         'location_details',
         'officer_name',
 
-        // بيانات الأطراف (JSON)
+        // بيانات الأطراف (legacy JSON)
         'parties_details',
 
         // تفاصيل البلاغ
@@ -43,31 +43,59 @@ class Report extends Model
         'attachments_paths',
     ];
 
+    protected $casts = [
+        'open_date_time'     => 'datetime',
+        'incident_date_time' => 'datetime',
+        'parties_details'    => 'array',
+        'statements_details' => 'array',
+        'seizures_details'   => 'array',
+        'attachments_paths'  => 'array',
+    ];
+
+    public function setPartiesDetailsAttribute($value): void
+    {
+        $this->attributes['parties_details'] = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
+    }
+
+    public function setStatementsDetailsAttribute($value): void
+    {
+        $this->attributes['statements_details'] = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
+    }
+
+    public function setSeizuresDetailsAttribute($value): void
+    {
+        $this->attributes['seizures_details'] = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
+    }
+
+    public function setAttachmentsPathsAttribute($value): void
+    {
+        $this->attributes['attachments_paths'] = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
+    }
+
+    public function persons()
+    {
+        return $this->hasMany(ReportPerson::class, 'report_id');
+    }
+
+    public function weapons()
+    {
+        return $this->hasMany(ReportWeapon::class, 'report_id');
+    }
+
+    public function suspects()
+    {
+        return $this->belongsToMany(Suspect::class, 'report_persons', 'report_id', 'person_id')
+            ->withPivot(['role', 'national_id', 'nationality', 'address', 'phone'])
+            ->withTimestamps();
+    }
+
     /**
      * تحويل الأنواع تلقائياً عند الجلب أو الحفظ
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            // تواريخ
-            'open_date_time'     => 'datetime',
-            'incident_date_time' => 'datetime',
-
-            // حقول JSON — يقوم Laravel بتحويلها تلقائياً إلى array عند القراءة
-            // وإلى JSON string عند الكتابة
-            'parties_details'    => 'array',
-            'statements_details' => 'array',
-            'seizures_details'   => 'array',
-            'attachments_paths'  => 'array',
-        ];
-    }
-
     // -----------------------------------------------------------------------
-    // ملاحظة: لا توجد أي علاقات (relations) في هذا الموديل بحسب المواصفات.
-    // جميع البيانات المركبة (الأطراف، الأقوال، الأحراز، المرفقات)
-    // تُخزَّن كـ JSON داخل حقول نصية في نفس الجدول.
+    // ملاحظة: تم إضافة علاقات إلى Report لتخفيف التخزين النصي القديم.
     // -----------------------------------------------------------------------
 
     /**

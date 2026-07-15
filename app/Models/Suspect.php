@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\PersonWeapon;
+use App\Models\ReportPerson;
+use App\Models\Weapon;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -32,15 +36,72 @@ class Suspect extends Model
         'profile_image_path',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'birth_date' => 'date',
-        'height_cm'  => 'integer',
+        'national_id' => 'encrypted',
+        'birth_date'  => 'date',
+        'height_cm'   => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $suspect) {
+            if ($suspect->isDirty('national_id') && $suspect->national_id !== null) {
+                $suspect->national_id_hash = hash('sha256', $suspect->national_id);
+            }
+        });
+    }
+
+    public function getNationalIdAttribute($value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        try {
+            return $this->fromEncryptedString($value);
+        } catch (DecryptException) {
+            return $value;
+        }
+    }
+
+    public function aliases()
+    {
+        return $this->hasMany(PersonAlias::class, 'person_id');
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(PersonAddress::class, 'person_id');
+    }
+
+    public function phones()
+    {
+        return $this->hasMany(PersonPhone::class, 'person_id');
+    }
+    public function personWeapons()
+    {
+        return $this->hasMany(PersonWeapon::class, 'person_id');
+    }
+
+    public function weapons()
+    {
+        return $this->hasManyThrough(Weapon::class, PersonWeapon::class, 'person_id', 'id', 'id', 'weapon_id');
+    }
+
+    public function reportPersons()
+    {
+        return $this->hasMany(ReportPerson::class, 'person_id');
+    }
+
+    public function convictions()
+    {
+        return $this->hasMany(PersonConviction::class, 'person_id');
+    }
+
+    public function associates()
+    {
+        return $this->hasMany(PersonAssociate::class, 'person_id');
+    }
 
     /** @var Collection<int, Report>|null */
     protected ?Collection $linkedReportsCache = null;
@@ -76,20 +137,7 @@ class Suspect extends Model
             return;
         }
 
-        $reports = Report::query()
-            ->where(function ($query) use ($linkable) {
-                foreach ($linkable as $suspect) {
-                    $query->orWhere(function ($q) use ($suspect) {
-                        if ($suspect->national_id) {
-                            $q->where('parties_details', 'like', '%' . $suspect->national_id . '%');
-                        }
-                        if ($suspect->full_name) {
-                            $q->orWhere('parties_details', 'like', '%' . $suspect->full_name . '%');
-                        }
-                    });
-                }
-            })
-            ->get();
+        $reports = Report::query()->get();
 
         foreach ($suspects as $suspect) {
             $suspect->linkedReportsCache = $reports->filter(
@@ -104,26 +152,44 @@ class Suspect extends Model
             return collect();
         }
 
-        return Report::where(function ($query) {
-            if ($this->national_id) {
-                $query->where('parties_details', 'like', '%' . $this->national_id . '%');
-            }
-            if ($this->full_name) {
-                $query->orWhere('parties_details', 'like', '%' . $this->full_name . '%');
-            }
-        })->get();
+        return Report::query()->get()->filter(fn (Report $report) => $this->matchesReport($report))->values();
     }
 
     public function matchesReport(Report $report): bool
     {
-        $partiesJson = json_encode($report->parties_details, JSON_UNESCAPED_UNICODE) ?: '';
+        if ($this->national_id) {
+            $hash = hash('sha256', $this->national_id);
+            if ($report->persons()->where('national_id_hash', $hash)->exists()) {
+                return true;
+            }
 
-        if ($this->national_id && str_contains($partiesJson, $this->national_id)) {
-            return true;
+            foreach ((array) ($report->parties_details ?? []) as $party) {
+                if (!is_array($party)) {
+                    continue;
+                }
+
+                $partyNationalId = trim((string) ($party['national_id'] ?? ''));
+                if ($partyNationalId !== '' && $partyNationalId === $this->national_id) {
+                    return true;
+                }
+            }
         }
 
-        if ($this->full_name && str_contains($partiesJson, $this->full_name)) {
-            return true;
+        if ($this->full_name) {
+            if ($report->persons()->where('full_name', 'like', '%' . $this->full_name . '%')->exists()) {
+                return true;
+            }
+
+            foreach ((array) ($report->parties_details ?? []) as $party) {
+                if (!is_array($party)) {
+                    continue;
+                }
+
+                $partyName = trim((string) ($party['full_name'] ?? ''));
+                if ($partyName !== '' && str_contains($partyName, $this->full_name)) {
+                    return true;
+                }
+            }
         }
 
         return false;

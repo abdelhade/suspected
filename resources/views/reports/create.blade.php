@@ -6,6 +6,14 @@
 
 @section('content')
 
+<div class="card-brutal p-3 mb-3" id="suggestions-panel" style="display:none;">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <h2 class="h6 fw-bold mb-0">اقتراحات ذكية</h2>
+        <span class="text-muted-brutal" style="font-size:.8rem;">يتم تحديثها أثناء الكتابة</span>
+    </div>
+    <div id="suggestions-content"></div>
+</div>
+
 @if($errors->any())
     <div class="alert mb-4 p-3" style="border:1px solid var(--brutal-black);background:var(--brutal-black);">
         <div class="neon-text fw-bold mb-2" style="font-size:.875rem;">يوجد أخطاء في البيانات:</div>
@@ -135,11 +143,25 @@
                 </button>
             </div>
             <div id="parties-container" class="p-4">
-                <div class="party-row">
-                    @include('reports.partials.party-row', ['index' => 0, 'party' => null])
-                </div>
+                @php
+                    $parties = old('parties_details');
+                    if (is_string($parties)) {
+                        $parties = json_decode($parties, true);
+                    }
+                    $parties = is_array($parties) ? $parties : [];
+                @endphp
+                @if(count($parties) > 0)
+                    @foreach($parties as $idx => $party)
+                        <div class="party-row" data-party-index="{{ $idx }}">
+                            @include('reports.partials.party-row', ['index' => $idx, 'party' => $party])
+                        </div>
+                    @endforeach
+                @else
+                    <div class="party-row">
+                        @include('reports.partials.party-row', ['index' => 0, 'party' => null])
+                    </div>
+                @endif
             </div>
-            <input type="hidden" name="parties_details" id="parties_json">
         </div>
 
         {{-- القسم 3: تفاصيل البلاغ --}}
@@ -169,12 +191,20 @@
                             إضافة إفادة
                         </button>
                     </div>
-                    <div id="statements-container">
-                        <div class="statement-row">
-                            @include('reports.partials.statement-row', ['index' => 0])
-                        </div>
+                            <div id="statements-container">
+                        @php $statements = old('statements_details') ?? []; @endphp
+                        @if(is_array($statements) && count($statements) > 0)
+                            @foreach($statements as $idx => $statement)
+                                <div class="statement-row" data-stmt-index="{{ $idx }}">
+                                    @include('reports.partials.statement-row', ['index' => $idx, 'statement' => $statement])
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="statement-row">
+                                @include('reports.partials.statement-row', ['index' => 0, 'statement' => null])
+                            </div>
+                        @endif
                     </div>
-                    <input type="hidden" name="statements_details" id="statements_json">
                 </div>
 
                 {{-- الأحراز --}}
@@ -191,13 +221,23 @@
                         </button>
                     </div>
                     <div id="seizures-container">
-                        <div class="seizure-row">
-                            <div class="row g-2">
-                                @include('reports.partials.seizure-row', ['index' => 0])
+                        @php $seizures = old('seizures_details') ?? []; @endphp
+                        @if(is_array($seizures) && count($seizures) > 0)
+                            @foreach($seizures as $idx => $seize)
+                                <div class="seizure-row" data-seize-index="{{ $idx }}">
+                                    <div class="row g-2">
+                                        @include('reports.partials.seizure-row', ['index' => $idx, 'seizure' => $seize])
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="seizure-row">
+                                <div class="row g-2">
+                                    @include('reports.partials.seizure-row', ['index' => 0, 'seizure' => null])
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
-                    <input type="hidden" name="seizures_details" id="seizures_json">
                 </div>
             </div>
         </div>
@@ -234,6 +274,74 @@
 @include('reports.partials.lookup-modal')
 @include('reports.partials.keyboard-nav')
 
+<script>
+    const suggestionsPanel = document.getElementById('suggestions-panel');
+    const suggestionsContent = document.getElementById('suggestions-content');
+    const form = document.getElementById('report-form');
+
+    const triggerSuggestions = () => {
+        const crimeType = document.getElementById('report_type')?.value || '';
+        const crimeMethod = document.getElementById('report_subject')?.value || '';
+        const location = document.getElementById('location_details')?.value || '';
+
+        if (!crimeType && !crimeMethod && !location) {
+            suggestionsPanel.style.display = 'none';
+            return;
+        }
+
+        suggestionsPanel.style.display = 'block';
+        suggestionsContent.innerHTML = '<div class="text-muted-brutal" style="font-size:.8rem;">جاري البحث...</div>';
+
+        fetch('{{ route('reports.suggestions') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                crime_type: crimeType,
+                crime_method: crimeMethod,
+                location: location
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                if (data.suspects?.length) {
+                    html += '<div class="mb-3"><div class="fw-bold mb-2">الأشخاص المشتبه بهم</div>';
+                    data.suspects.slice(0, 4).forEach(item => {
+                        html += `<div class="border p-2 mb-2"><div class="fw-bold">${item.name || '—'}</div><div class="text-muted-brutal" style="font-size:.75rem;">${item.registration_category || ''} · ${item.reason || ''}</div></div>`;
+                    });
+                    html += '</div>';
+                }
+                if (data.weapons?.length) {
+                    html += '<div><div class="fw-bold mb-2">الأسلحة المحتملة</div>';
+                    data.weapons.slice(0, 4).forEach(item => {
+                        html += `<div class="border p-2 mb-2"><div class="fw-bold">${item.name || '—'}</div><div class="text-muted-brutal" style="font-size:.75rem;">${item.reason || ''}</div></div>`;
+                    });
+                    html += '</div>';
+                }
+                if (!html) {
+                    html = '<div class="text-muted-brutal" style="font-size:.8rem;">لا توجد اقتراحات حالياً.</div>';
+                }
+                suggestionsContent.innerHTML = html;
+            })
+            .catch(() => {
+                suggestionsContent.innerHTML = '<div class="text-danger" style="font-size:.8rem;">تعذر تحميل الاقتراحات.</div>';
+            });
+    };
+
+    ['report_type', 'report_subject', 'location_details'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', triggerSuggestions);
+            el.addEventListener('change', triggerSuggestions);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', triggerSuggestions);
+</script>
+
 @push('scripts')
 <script>
 (function () {
@@ -244,7 +352,7 @@
     function partyField(idx, name, label, placeholder) {
         return `<div class="col-6 col-md-3">
             <label class="form-label">${label}</label>
-            <input type="text" data-party="${idx}" data-field="${name}" placeholder="${placeholder}"
+            <input type="text" name="parties_details[${idx}][${name}]" data-party="${idx}" data-field="${name}" placeholder="${placeholder}"
                    class="form-control party-input">
         </div>`;
     }
@@ -286,18 +394,18 @@
             <div class="row g-2 mb-2">
                 <div class="col-12 col-sm-6">
                     <label class="form-label">اسم الطرف</label>
-                    <input type="text" data-stmt="${index}" data-field="party" placeholder="اسم الشخص"
+                    <input type="text" name="statements_details[${index}][party]" data-stmt="${index}" data-field="party" placeholder="اسم الشخص"
                            class="form-control stmt-input">
                 </div>
                 <div class="col-12 col-sm-6">
                     <label class="form-label">الصفة</label>
-                    <input type="text" data-stmt="${index}" data-field="role" placeholder="مشتكي / شاهد / ..."
+                    <input type="text" name="statements_details[${index}][role]" data-stmt="${index}" data-field="role" placeholder="مشتكي / شاهد / ..."
                            class="form-control stmt-input">
                 </div>
             </div>
             <div>
                 <label class="form-label">نص الإفادة (سؤال وجواب)</label>
-                <textarea data-stmt="${index}" data-field="text" rows="3"
+                <textarea name="statements_details[${index}][text]" data-stmt="${index}" data-field="text" rows="3"
                           class="form-control stmt-textarea"></textarea>
             </div>
         </div>`;
@@ -315,20 +423,20 @@
             <div class="row g-2">
                 <div class="col-6 col-md-3">
                     <label class="form-label">اسم الحرز</label>
-                    <input type="text" data-seize="${index}" data-field="name" class="form-control seize-input" placeholder="وصف الحرز">
+                    <input type="text" name="seizures_details[${index}][name]" data-seize="${index}" data-field="name" class="form-control seize-input" placeholder="وصف الحرز">
                 </div>
                 <div class="col-6 col-md-3">
                     <label class="form-label">الكمية</label>
-                    <input type="text" data-seize="${index}" data-field="quantity" class="form-control seize-input" placeholder="1 / طرد / ...">
+                    <input type="text" name="seizures_details[${index}][quantity]" data-seize="${index}" data-field="quantity" class="form-control seize-input" placeholder="1 / طرد / ...">
                 </div>
                 <div class="col-6 col-md-3">
                     <label class="form-label">الحالة</label>
-                    <input type="text" data-seize="${index}" data-field="condition" class="form-control seize-input" placeholder="سليم / تالف / ...">
+                    <input type="text" name="seizures_details[${index}][condition]" data-seize="${index}" data-field="condition" class="form-control seize-input" placeholder="سليم / تالف / ...">
                 </div>
                 <div class="col-6 col-md-3">
                     <label class="form-label">وصف إضافي</label>
                     <div class="d-flex gap-1">
-                        <input type="text" data-seize="${index}" data-field="description" class="form-control seize-input flex-grow-1" placeholder="تفاصيل...">
+                        <input type="text" name="seizures_details[${index}][description]" data-seize="${index}" data-field="description" class="form-control seize-input flex-grow-1" placeholder="تفاصيل...">
                         <button type="button" onclick="removeRow(this, '.seizure-row')"
                                 class="btn btn-sm" style="border:1px solid #f87171;color:#dc3545;font-weight:700;">✕</button>
                     </div>
@@ -345,23 +453,6 @@
     });
 
     window.removeRow = function (btn, selector) { btn.closest(selector).remove(); };
-
-    document.getElementById('report-form').addEventListener('submit', function () {
-        const p = []; document.querySelectorAll('.party-row').forEach(r => {
-            const o = {}; r.querySelectorAll('.party-input').forEach(i => o[i.dataset.field] = i.value.trim());
-            if (Object.values(o).some(v => v)) p.push(o);
-        }); document.getElementById('parties_json').value = JSON.stringify(p);
-
-        const s = []; document.querySelectorAll('.statement-row').forEach(r => {
-            const o = {}; r.querySelectorAll('.stmt-input, .stmt-textarea').forEach(i => o[i.dataset.field] = i.value.trim());
-            if (Object.values(o).some(v => v)) s.push(o);
-        }); document.getElementById('statements_json').value = JSON.stringify(s);
-
-        const z = []; document.querySelectorAll('.seizure-row').forEach(r => {
-            const o = {}; r.querySelectorAll('.seize-input').forEach(i => o[i.dataset.field] = i.value.trim());
-            if (Object.values(o).some(v => v)) z.push(o);
-        }); document.getElementById('seizures_json').value = JSON.stringify(z);
-    });
 })();
 </script>
 @endpush

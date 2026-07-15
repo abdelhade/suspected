@@ -15,11 +15,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 // المحاضر
 // ============================================================
 Route::resource('reports', ReportController::class);
+Route::post('reports/suggestions', [ReportController::class, 'suggestions'])->name('reports.suggestions');
 
 // ============================================================
 // المسجلين والمطلوبين
 // ============================================================
 Route::resource('suspects', \App\Http\Controllers\SuspectController::class);
+Route::get('suspects/export', [\App\Http\Controllers\SuspectController::class, 'export'])
+    ->name('suspects.export');
 
 // ============================================================
 // الأسلحة والمضبوطات النارية

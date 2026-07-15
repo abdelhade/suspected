@@ -6,6 +6,7 @@ use App\Models\Suspect;
 use App\Models\Report;
 use App\Models\AuditLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class SuspectReportLinkTest extends TestCase
@@ -69,6 +70,26 @@ class SuspectReportLinkTest extends TestCase
     /**
      * اختبار تسجيل أحداث التدقيق عند تعديل المحضر وتحويله إلى pending
      */
+    public function test_index_handles_invalid_encrypted_national_id(): void
+    {
+        $suspect = Suspect::create([
+            'full_name' => 'مسجل باسم غير قابل للفك',
+            'national_id' => '12345678901234',
+            'registration_category' => 'مسجل شقي خطر',
+            'danger_level' => 'عالية',
+            'current_status' => 'نشط',
+        ]);
+
+        DB::table('suspects')->where('id', $suspect->id)->update([
+            'national_id' => 'invalid-encrypted-payload',
+        ]);
+
+        $response = $this->get('/suspects');
+
+        $response->assertStatus(200);
+        $response->assertSee('مسجل باسم غير قابل للفك');
+    }
+
     public function test_audit_log_on_report_update_and_pending_transition(): void
     {
         // إنشاء محضر عبر POST لتشغيل منطق المتحكم وتسجيل التدقيق
