@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Suspect;
+use App\Models\Report;
+use Carbon\Carbon;
+
 class DashboardService
 {
     /**
@@ -9,18 +13,21 @@ class DashboardService
      */
     public function getStats(): array
     {
-        // TODO: استبدال ببيانات حقيقية من Person / Report models
+        $now = Carbon::now();
+        $startOfMonth = $now->startOfMonth();
+        $startOfDay = $now->startOfDay();
+
         return [
-            'total_persons' => 1247,
-            'registered_a' => 312,
-            'registered_b' => 489,
-            'visitors' => 446,
-            'wanted' => 87,
-            'detained' => 34,
-            'pending_reports' => 23,
-            'pending_approvals' => 15,
-            'reports_this_month' => 156,
-            'reports_today' => 8,
+            'total_persons' => Suspect::count(),
+            'registered_a' => Suspect::where('registration_category', 'مسجل A')->count(),
+            'registered_b' => Suspect::where('registration_category', 'مسجل B')->count(),
+            'visitors' => Suspect::where('registration_category', 'زائر')->count(),
+            'wanted' => Suspect::where('current_status', 'مطلوب')->count(),
+            'detained' => Suspect::where('current_status', 'محبوس')->count(),
+            'pending_reports' => Report::where('current_status', 'pending')->count(),
+            'pending_approvals' => Suspect::where('current_status', 'pending')->count(),
+            'reports_this_month' => Report::where('open_date_time', '>=', $startOfMonth)->count(),
+            'reports_today' => Report::where('open_date_time', '>=', $startOfDay)->count(),
         ];
     }
 
@@ -29,11 +36,24 @@ class DashboardService
      */
     public function getPersonTypeBreakdown(): array
     {
-        return [
-            ['label' => 'مسجّل A', 'value' => 312, 'color' => 'red'],
-            ['label' => 'مسجّل B', 'value' => 489, 'color' => 'orange'],
-            ['label' => 'زائر', 'value' => 446, 'color' => 'yellow'],
-        ];
+        $types = Suspect::selectRaw('registration_category as label, COUNT(*) as value')
+            ->groupBy('registration_category')
+            ->get()
+            ->map(function ($item) {
+                $color = match($item->label) {
+                    'مسجل A' => 'red',
+                    'مسجل B' => 'orange',
+                    'زائر' => 'yellow',
+                    default => 'gray',
+                };
+                return [
+                    'label' => $item->label ?? 'غير محدد',
+                    'value' => $item->value,
+                    'color' => $color,
+                ];
+            })->values()->toArray();
+
+        return $types;
     }
 
     /**
@@ -41,12 +61,26 @@ class DashboardService
      */
     public function getRiskLevelBreakdown(): array
     {
-        return [
-            ['label' => 'حرج', 'value' => 45, 'color' => 'red'],
-            ['label' => 'عالي', 'value' => 198, 'color' => 'orange'],
-            ['label' => 'متوسط', 'value' => 412, 'color' => 'yellow'],
-            ['label' => 'منخفض', 'value' => 592, 'color' => 'green'],
-        ];
+        $levels = Suspect::selectRaw('danger_level as label, COUNT(*) as value')
+            ->whereNotNull('danger_level')
+            ->groupBy('danger_level')
+            ->get()
+            ->map(function ($item) {
+                $color = match($item->label) {
+                    'حرج' => 'red',
+                    'عالي' => 'orange',
+                    'متوسط' => 'yellow',
+                    'منخفض' => 'green',
+                    default => 'gray',
+                };
+                return [
+                    'label' => $item->label ?? 'غير محدد',
+                    'value' => $item->value,
+                    'color' => $color,
+                ];
+            })->values()->toArray();
+
+        return $levels;
     }
 
     /**
@@ -54,14 +88,29 @@ class DashboardService
      */
     public function getMonthlyReports(): array
     {
-        return [
-            ['month' => 'يناير', 'count' => 98],
-            ['month' => 'فبراير', 'count' => 112],
-            ['month' => 'مارس', 'count' => 134],
-            ['month' => 'أبريل', 'count' => 121],
-            ['month' => 'مايو', 'count' => 145],
-            ['month' => 'يونيو', 'count' => 156],
+        $months = [
+            'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
         ];
+
+        $currentYear = Carbon::now()->year;
+
+        $reports = Report::selectRaw('MONTH(open_date_time) as month_num, COUNT(*) as count')
+            ->whereYear('open_date_time', $currentYear)
+            ->groupBy('month_num')
+            ->orderBy('month_num')
+            ->get()
+            ->keyBy('month_num');
+
+        $result = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $result[] = [
+                'month' => $months[$i - 1],
+                'count' => $reports->get($i)?->count ?? 0,
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -69,53 +118,21 @@ class DashboardService
      */
     public function getRecentReports(): array
     {
-        return [
-            [
-                'number' => 'RPT-2026-00156',
-                'crime_type' => 'سرقة',
-                'method' => 'مسلح',
-                'location' => 'المعادي، القاهرة',
-                'occurred_at' => '2026-06-11 23:15',
-                'status' => 'pending_review',
-                'persons_count' => 2,
-            ],
-            [
-                'number' => 'RPT-2026-00155',
-                'crime_type' => 'بلطجة',
-                'method' => 'جماعي',
-                'location' => '6 أكتوبر، الجيزة',
-                'occurred_at' => '2026-06-11 19:40',
-                'status' => 'approved',
-                'persons_count' => 4,
-            ],
-            [
-                'number' => 'RPT-2026-00154',
-                'crime_type' => 'احتيال',
-                'method' => 'إلكتروني',
-                'location' => 'مدينة نصر، القاهرة',
-                'occurred_at' => '2026-06-10 14:20',
-                'status' => 'draft',
-                'persons_count' => 1,
-            ],
-            [
-                'number' => 'RPT-2026-00153',
-                'crime_type' => 'مخدرات',
-                'method' => 'فردي',
-                'location' => 'الإسكندرية',
-                'occurred_at' => '2026-06-10 02:30',
-                'status' => 'approved',
-                'persons_count' => 3,
-            ],
-            [
-                'number' => 'RPT-2026-00152',
-                'crime_type' => 'سرقة',
-                'method' => 'كسر باب',
-                'location' => 'المقطم، القاهرة',
-                'occurred_at' => '2026-06-09 04:00',
-                'status' => 'pending_review',
-                'persons_count' => 1,
-            ],
-        ];
+        return Report::latest('open_date_time')
+            ->limit(5)
+            ->get()
+            ->map(function ($report) {
+                return [
+                    'id' => $report->id,
+                    'number' => $report->report_number ?? 'بدون رقم',
+                    'crime_type' => $report->report_type ?? 'غير محدد',
+                    'method' => 'غير محدد',
+                    'location' => $report->location_governorate ?? 'غير محدد',
+                    'occurred_at' => $report->incident_date_time?->format('Y-m-d H:i') ?? $report->open_date_time?->format('Y-m-d H:i'),
+                    'status' => $report->current_status ?? 'draft',
+                    'persons_count' => $report->persons()->count(),
+                ];
+            })->toArray();
     }
 
     /**
@@ -123,32 +140,21 @@ class DashboardService
      */
     public function getPendingApprovals(): array
     {
-        return [
-            [
-                'file_number' => 'REG-2026-00441',
-                'full_name' => 'محمد عبد الرحمن',
-                'person_type' => 'visitor',
-                'target_type' => 'registered_b',
-                'submitted_at' => '2026-06-11 10:30',
-                'submitted_by' => 'ض. أحمد حسن',
-            ],
-            [
-                'file_number' => 'REG-2026-00438',
-                'full_name' => 'خالد إبراهيم',
-                'person_type' => 'visitor',
-                'target_type' => 'registered_a',
-                'submitted_at' => '2026-06-10 16:45',
-                'submitted_by' => 'ض. سامي محمود',
-            ],
-            [
-                'file_number' => 'REG-2026-00435',
-                'full_name' => 'عمر يوسف',
-                'person_type' => 'registered_b',
-                'target_type' => 'registered_a',
-                'submitted_at' => '2026-06-10 09:15',
-                'submitted_by' => 'م. كريم فتحي',
-            ],
-        ];
+        return Suspect::where('current_status', 'pending')
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(function ($suspect) {
+                return [
+                    'id' => $suspect->id,
+                    'file_number' => 'REG-' . $suspect->id,
+                    'full_name' => $suspect->full_name ?? 'غير محدد',
+                    'person_type' => $suspect->registration_category ?? 'غير محدد',
+                    'target_type' => 'غير محدد',
+                    'submitted_at' => $suspect->created_at?->format('Y-m-d H:i'),
+                    'submitted_by' => 'غير محدد',
+                ];
+            })->toArray();
     }
 
     /**
@@ -156,12 +162,17 @@ class DashboardService
      */
     public function getTopGovernorates(): array
     {
-        return [
-            ['governorate' => 'القاهرة', 'count' => 423],
-            ['governorate' => 'الجيزة', 'count' => 287],
-            ['governorate' => 'الإسكندرية', 'count' => 156],
-            ['governorate' => 'القليوبية', 'count' => 98],
-            ['governorate' => 'الشرقية', 'count' => 76],
-        ];
+        return Report::selectRaw('location_governorate as governorate, COUNT(*) as count')
+            ->whereNotNull('location_governorate')
+            ->groupBy('location_governorate')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'governorate' => $item->governorate ?? 'غير محدد',
+                    'count' => $item->count,
+                ];
+            })->toArray();
     }
 }

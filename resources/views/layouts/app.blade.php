@@ -15,29 +15,28 @@
     {{-- Sidebar --}}
     <aside id="sidebar">
         <div class="sidebar-header">
-            <div class="d-flex align-items-center gap-2">
-                <div class="neon-bg d-flex align-items-center justify-content-center"
-                     style="width:28px;height:28px;border:1px solid var(--brutal-black);">
-                    <svg width="14" height="14" fill="none" stroke="var(--brutal-black)" stroke-width="1.5" viewBox="0 0 24 24">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div>
-                    <div class="fw-bold" style="font-size:.875rem;line-height:1.2;">المسجلين خطر</div>
-                    <div style="font-size:.7rem;color:rgba(26,26,26,.6);">نظام السجلات</div>
+                    <div class="fw-bold" style="font-size:1rem;line-height:1.3;color:var(--text-primary);">نظام إدارة الجرائم</div>
+                    <div style="font-size:var(--font-size-xs);color:var(--text-secondary);">المديرية العامة للأمن</div>
                 </div>
             </div>
-            <button id="sidebar-close" type="button" class="btn p-1 d-lg-none" aria-label="إغلاق القائمة">
+            <button id="sidebar-close" type="button" class="btn btn-icon d-lg-none" aria-label="إغلاق القائمة">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
 
-        <nav class="flex-grow-1 overflow-auto p-2">
+        <nav class="flex-grow-1 overflow-auto p-3">
             <a href="{{ route('dashboard') }}"
                class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
                 </svg>
                 لوحة التحكم
@@ -54,32 +53,33 @@
                 @if($item['route'])
                     <a href="{{ route($item['route']) }}"
                        class="nav-link {{ request()->routeIs(explode('.', $item['route'])[0] . '.*') ? 'active' : '' }}">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
                         </svg>
                         {{ $item['label'] }}
                     </a>
                 @else
                     <span class="nav-link disabled-link">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
                         </svg>
                         {{ $item['label'] }}
-                        <span class="ms-auto badge-brutal badge-light" style="font-size:.6rem;">قريباً</span>
+                        <span class="ms-auto badge-brutal badge-light" style="font-size:var(--font-size-xs);">قريباً</span>
                     </span>
                 @endif
             @endforeach
         </nav>
 
         <div class="sidebar-footer">
-            <div class="d-flex align-items-center gap-2 p-2" style="border:1px solid var(--brutal-black);">
-                <div class="d-flex align-items-center justify-content-center fw-bold neon-text"
-                     style="width:32px;height:32px;background:var(--brutal-black);border:1px solid var(--brutal-black);font-size:.75rem;">
-                    م
+            <div class="d-flex align-items-center gap-3 p-3" style="background:var(--bg-card);border-radius:var(--radius-lg);border:1px solid var(--border-color);">
+                <div class="stat-icon-wrapper secondary">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
                 </div>
                 <div>
-                    <div class="fw-bold" style="font-size:.875rem;">مدير النظام</div>
-                    <div style="font-size:.7rem;color:rgba(26,26,26,.55);">Admin</div>
+                    <div class="fw-bold" style="font-size:var(--font-size-sm);color:var(--text-primary);">مدير النظام</div>
+                    <div style="font-size:var(--font-size-xs);color:var(--text-secondary);">Administrator</div>
                 </div>
             </div>
         </div>
@@ -90,34 +90,37 @@
 
         {{-- Top bar --}}
         <header id="topbar">
-            <div class="d-flex align-items-center gap-3">
-                <button id="sidebar-open" type="button" class="btn p-1 d-lg-none"
-                        style="border:1px solid var(--brutal-black);" aria-label="فتح القائمة">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <div class="d-flex align-items-center gap-4">
+                <button id="sidebar-open" type="button" class="btn btn-icon d-lg-none" aria-label="فتح القائمة">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
                 <div>
-                    <div class="fw-bold" style="font-size:.95rem;">@yield('page-title', 'لوحة التحكم')</div>
-                    <div style="font-size:.7rem;color:rgba(26,26,26,.55);">@yield('page-subtitle', 'نظرة عامة')</div>
+                    <div class="fw-bold" style="font-size:var(--font-size-lg);color:var(--text-primary);">@yield('page-title', 'لوحة التحكم')</div>
+                    <div style="font-size:var(--font-size-xs);color:var(--text-secondary);">@yield('page-subtitle', 'نظرة عامة')</div>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <span class="d-none d-sm-block" style="font-size:.75rem;color:rgba(26,26,26,.55);">
+                <div class="search-box d-none d-md-flex" style="width:280px;">
+                    <svg width="16" height="16" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" placeholder="بحث سريع...">
+                </div>
+                <span class="d-none d-sm-block" style="font-size:var(--font-size-sm);color:var(--text-secondary);">
                     {{ now()->translatedFormat('l، d F Y') }}
                 </span>
-                <button type="button" class="btn p-1 position-relative"
-                        style="border:1px solid var(--brutal-black);">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <button type="button" class="btn btn-icon position-relative">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
-                    <span class="position-absolute top-0 start-0 neon-bg"
-                          style="width:8px;height:8px;border:1px solid var(--brutal-black);"></span>
+                    <span class="position-absolute top-0 start-0" style="width:8px;height:8px;background:var(--danger);border-radius:50%;border:2px solid var(--bg-card);"></span>
                 </button>
             </div>
         </header>
 
-        <main class="p-3 p-lg-4 flex-grow-1">
+        <main class="p-4 p-lg-5 flex-grow-1">
             @yield('content')
         </main>
     </div>
