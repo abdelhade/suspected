@@ -101,7 +101,7 @@
         </aside>
 
         {{-- Main --}}
-        <div class="flex flex-1 flex-col lg:mr-64">
+        <div class="flex flex-1 flex-col lg:mr-64 main-content">
 
             {{-- Top bar --}}
             <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-brutal-black bg-brutal-white px-4 lg:px-6">
@@ -109,6 +109,12 @@
                     <button id="sidebar-open" type="button" class="border border-brutal-black p-1.5 lg:hidden" aria-label="فتح القائمة">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <!-- Toggle minimized sidebar -->
+                    <button id="sidebar-toggle" type="button" class="border border-brutal-black p-1.5 lg:hidden ml-2" aria-label="Toggle sidebar">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                         </svg>
                     </button>
                     <div>
@@ -132,6 +138,6 @@
             </main>
         </div>
     </div>
-    @stack('scripts')
+    @vite(['resources/js/sidebar-toggle.js'])\n@stack('scripts')
 </body>
 </html>

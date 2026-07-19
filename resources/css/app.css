@@ -13,6 +13,8 @@
     --color-brutal-smoke: #1a1a1a;
     --color-neon: #e4ff00;
     --color-neon-dim: #b8cc00;
+    --sidebar-width: 256px;
+    --sidebar-min-width: 4rem;
 }
 
 @layer base {
@@ -83,5 +85,19 @@
 
     .neon-glow {
         box-shadow: 0 0 16px color-mix(in srgb, var(--color-neon) 40%, transparent);
+    }
+}
+
+@layer components {
+    /* Sidebar minimized state */
+    .sidebar-minimized #sidebar {
+        width: var(--sidebar-min-width) !important;
+        transition: width 0.3s ease;
+    }
+    .sidebar-minimized .nav-label {
+        display: none !important;
+    }
+    .sidebar-minimized .main-content {
+        margin-right: var(--sidebar-min-width) !important;
     }
 }

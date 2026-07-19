@@ -34,6 +34,11 @@
     </div>
 
     <div class="space-y-5">
+    <div class="flex gap-2 mb-4" id="suspect-tabs">
+        <button type="button" class="px-4 py-2 bg-brutal-white border-b-2 border-neon text-neon font-bold" data-target="personal">البيانات الشخصية</button>
+        <button type="button" class="px-4 py-2 bg-brutal-white text-brutal-smoke font-bold" data-target="classification">التصنيف الجنائي</button>
+        <button type="button" class="px-4 py-2 bg-brutal-white text-brutal-smoke font-bold" data-target="physical">المواصفات الجسدية</button>
+    </div>
 
         {{-- =====================================================
              القسم 1: البيانات الشخصية
@@ -50,7 +55,7 @@
                     <label for="full_name" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الاسم الرباعي</label>
                     <input id="full_name" type="text" name="full_name"
                            value="{{ old('full_name') }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon focus:bg-neon/5 @error('full_name') border-red-500 @enderror">
+                           class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon focus:bg-neon/5 @error('full_name') border-red-500 @enderror">
                 </div>
 
                 {{-- اسم الشهرة --}}
@@ -58,7 +63,7 @@
                     <label for="alias_name" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">اسم الشهرة / اللقب</label>
                     <input id="alias_name" type="text" name="alias_name"
                            value="{{ old('alias_name') }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('alias_name') border-red-500 @enderror">
+                           class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('alias_name') border-red-500 @enderror">
                 </div>
 
                 {{-- الرقم القومي --}}
@@ -66,7 +71,7 @@
                     <label for="national_id" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الرقم القومي</label>
                     <input id="national_id" type="text" name="national_id"
                            value="{{ old('national_id') }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('national_id') border-red-500 @enderror">
+                           class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('national_id') border-red-500 @enderror">
                 </div>
 
                 {{-- تاريخ الميلاد --}}
@@ -74,7 +79,7 @@
                     <label for="birth_date" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">تاريخ الميلاد</label>
                     <input id="birth_date" type="date" name="birth_date"
                            value="{{ old('birth_date') }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('birth_date') border-red-500 @enderror">
+                           class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('birth_date') border-red-500 @enderror">
                 </div>
 
                 {{-- محل الإقامة --}}
@@ -101,7 +106,7 @@
                 <div class="flex flex-col gap-1.5">
                     <label for="registration_category" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">فئة المسجل</label>
                     <select id="registration_category" name="registration_category"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('registration_category') border-red-500 @enderror">
+                            class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('registration_category') border-red-500 @enderror">
                         <option value="">— اختر —</option>
                         @foreach(['مسجل شقي خطر', 'معلومات', 'مطلوب', 'مشتبه به', 'زائر'] as $cat)
                             <option value="{{ $cat }}" @selected(old('registration_category') === $cat)>{{ $cat }}</option>
@@ -113,7 +118,7 @@
                 <div class="flex flex-col gap-1.5">
                     <label for="danger_level" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">مستوى الخطورة</label>
                     <select id="danger_level" name="danger_level"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('danger_level') border-red-500 @enderror">
+                            class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('danger_level') border-red-500 @enderror">
                         <option value="">— اختر —</option>
                         @foreach(['عالية جداً', 'عالية', 'متوسطة', 'منخفضة'] as $danger)
                             <option value="{{ $danger }}" @selected(old('danger_level') === $danger)>{{ $danger }}</option>
@@ -125,7 +130,7 @@
                 <div class="flex flex-col gap-1.5">
                     <label for="current_status" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الحالة الجنائية الحالية</label>
                     <select id="current_status" name="current_status"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('current_status') border-red-500 @enderror">
+                            class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('current_status') border-red-500 @enderror">
                         <option value="">— اختر —</option>
                         @foreach(['هارب', 'محبوس', 'مفرج عنه', 'تحت المراقبة', 'حر'] as $status)
                             <option value="{{ $status }}" @selected(old('current_status') === $status)>{{ $status }}</option>
@@ -139,7 +144,7 @@
                     <input id="criminal_activity" type="text" name="criminal_activity"
                            value="{{ old('criminal_activity') }}"
                            placeholder="سرقة، مخدرات، بلطجة..."
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('criminal_activity') border-red-500 @enderror">
+                           class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('criminal_activity') border-red-500 @enderror">
                 </div>
 
             </div>
@@ -160,14 +165,14 @@
                     <label for="height_cm" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الطول (سم)</label>
                     <input id="height_cm" type="number" name="height_cm"
                            value="{{ old('height_cm') }}"
-                           class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('height_cm') border-red-500 @enderror">
+                           class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('height_cm') border-red-500 @enderror">
                 </div>
 
                 {{-- بنية الجسم --}}
                 <div class="flex flex-col gap-1.5 md:col-span-2">
                     <label for="body_build" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">بنية الجسم</label>
                     <select id="body_build" name="body_build"
-                            class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon @error('body_build') border-red-500 @enderror">
+                            class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold focus:outline-none focus:border-neon @error('body_build') border-red-500 @enderror">
                         <option value="">— اختر —</option>
                         @foreach(['نحيف', 'متوسط', 'رياضي', 'ممتلئ', 'بدين'] as $build)
                             <option value="{{ $build }}" @selected(old('body_build') === $build)>{{ $build }}</option>
@@ -179,7 +184,7 @@
                 <div class="flex flex-col gap-1.5 md:col-span-3">
                     <label for="distinguishing_marks" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">العلامات المميزة والوشوم</label>
                     <textarea id="distinguishing_marks" name="distinguishing_marks" rows="2"
-                              class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold resize-y focus:outline-none focus:border-neon @error('distinguishing_marks') border-red-500 @enderror">{{ old('distinguishing_marks') }}</textarea>
+                              class="border border-brutal-black bg-brutal-white px-2 py-1 text-sm font-bold resize-y focus:outline-none focus:border-neon @error('distinguishing_marks') border-red-500 @enderror">{{ old('distinguishing_marks') }}</textarea>
                 </div>
 
                 {{-- الصورة الشخصية --}}
