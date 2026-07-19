@@ -1,19 +1,23 @@
 {{-- Lookup Modal --}}
-<div id="lookup-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-brutal-black/60 p-4">
-    <div class="brutal-card w-full max-w-sm">
-        <div class="flex items-center justify-between border-b border-brutal-black bg-brutal-black px-4 py-3">
-            <h3 id="lookup-modal-title" class="text-sm font-bold uppercase tracking-widest text-neon">إضافة عنصر جديد</h3>
-            <button type="button" onclick="closeLookupModal()" class="text-neon hover:text-white">✕</button>
-        </div>
-        <div class="p-4 space-y-4">
-            <div class="flex flex-col gap-1.5">
-                <label id="lookup-modal-label" class="text-xs font-bold uppercase tracking-widest text-brutal-smoke/60">الاسم</label>
-                <input type="text" id="lookup-input" class="border border-brutal-black bg-brutal-white px-3 py-2.5 text-sm font-bold focus:outline-none focus:border-neon">
-                <p id="lookup-error" class="text-xs text-red-600 hidden"></p>
+<div class="modal fade" id="lookup-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+        <div class="modal-content" style="border:1px solid var(--brutal-black);">
+            <div class="modal-header" style="background:var(--brutal-black);border-bottom:1px solid var(--brutal-black);">
+                <h5 id="lookup-modal-title" class="modal-title neon-text fw-bold" style="font-size:.875rem;letter-spacing:.08em;">
+                    إضافة عنصر جديد
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
             </div>
-            <div class="flex justify-end gap-2">
-                <button type="button" onclick="closeLookupModal()" class="brutal-btn-ghost px-4 py-2">إلغاء</button>
-                <button type="button" id="lookup-save-btn" class="brutal-btn-primary px-4 py-2">حفظ</button>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label id="lookup-modal-label" class="form-label">الاسم</label>
+                    <input type="text" id="lookup-input" class="form-control">
+                    <div id="lookup-error" class="text-danger mt-1" style="font-size:.75rem;display:none;"></div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-brutal-ghost px-4" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" id="lookup-save-btn" class="btn btn-brutal-primary px-4">حفظ</button>
+                </div>
             </div>
         </div>
     </div>
@@ -21,37 +25,37 @@
 
 <script>
     let currentLookupType = null;
+    let lookupModalInstance = null;
 
     function openLookupModal(type) {
         currentLookupType = type;
         document.getElementById('lookup-modal-title').textContent = type === 'type' ? 'إضافة نوع محضر' : 'إضافة حالة محضر';
         document.getElementById('lookup-modal-label').textContent = type === 'type' ? 'اسم النوع' : 'اسم الحالة';
         document.getElementById('lookup-input').value = '';
-        document.getElementById('lookup-error').classList.add('hidden');
-        document.getElementById('lookup-modal').classList.remove('hidden');
-        document.getElementById('lookup-modal').classList.add('flex');
-        document.getElementById('lookup-input').focus();
-    }
-
-    function closeLookupModal() {
-        document.getElementById('lookup-modal').classList.add('hidden');
-        document.getElementById('lookup-modal').classList.remove('flex');
+        document.getElementById('lookup-error').style.display = 'none';
+        if (!lookupModalInstance) {
+            lookupModalInstance = new bootstrap.Modal(document.getElementById('lookup-modal'));
+        }
+        lookupModalInstance.show();
+        setTimeout(() => document.getElementById('lookup-input').focus(), 300);
     }
 
     document.getElementById('lookup-save-btn').addEventListener('click', async function() {
         const input = document.getElementById('lookup-input');
         const val = input.value.trim();
         const errorEl = document.getElementById('lookup-error');
-        
+
         if (!val) {
             errorEl.textContent = 'الرجاء إدخال الاسم';
-            errorEl.classList.remove('hidden');
+            errorEl.style.display = 'block';
             return;
         }
 
-        const url = currentLookupType === 'type' ? '{{ route("lookups.types.store") }}' : '{{ route("lookups.statuses.store") }}';
+        const url = currentLookupType === 'type'
+            ? '{{ route("lookups.types.store") }}'
+            : '{{ route("lookups.statuses.store") }}';
         const selectId = currentLookupType === 'type' ? 'report_type' : 'current_status';
-        
+
         this.disabled = true;
         this.textContent = 'جاري الحفظ...';
 
@@ -66,23 +70,21 @@
                 body: JSON.stringify({ name: val })
             });
             const data = await res.json();
-            
             if (data.success) {
-                // إضافة الـ option الجديد
                 const select = document.getElementById(selectId);
                 const option = document.createElement('option');
                 option.value = data.data.name;
                 option.text = data.data.name;
                 option.selected = true;
                 select.add(option);
-                closeLookupModal();
+                lookupModalInstance.hide();
             } else {
                 errorEl.textContent = data.message || 'حدث خطأ. تأكد أن الاسم غير مكرر.';
-                errorEl.classList.remove('hidden');
+                errorEl.style.display = 'block';
             }
         } catch (e) {
             errorEl.textContent = 'حدث خطأ في الاتصال بالخادم.';
-            errorEl.classList.remove('hidden');
+            errorEl.style.display = 'block';
         } finally {
             this.disabled = false;
             this.textContent = 'حفظ';
